@@ -27,7 +27,7 @@ def get_filters():
     # TO DO: get user input for month (all, january, february, ... , june)
     months = ['all', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
     while True:
-        month = input("Please enter the month you would like to view. ('all', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'):").lower() 
+        month = input("Please enter the month you would like to view. ('all', 'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'):").lower()
         if month in months:
             break
         else:
@@ -36,7 +36,7 @@ def get_filters():
     # TO DO: get user input for day of week (all, monday, tuesday, ... sunday)
     days = ['all', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
     while True:
-        day = input("Please enter the day of the week you would like to view. ('all', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'):").lower() 
+        day = input("Please enter the day of the week you would like to view. ('all', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'):").lower()
         if day in days:
             break
         else:
@@ -45,6 +45,23 @@ def get_filters():
     print('-'*40)
     return city, month, day
 
+def display_data(df):
+   
+    start_loc = 0
+    end_loc = 5
+    while True: 
+        view_data = input("Would you like to view 5 rows of individual trip data? Enter yes or no?").lower()
+        if view_data == 'yes': 
+            print(df.iloc[start_loc:end_loc])
+            start_loc += 5
+            end_loc += 5
+            view_display = input("Would you like to continue?: ").lower()
+            if view_display == 'yes':
+                continue
+            else: 
+                break
+        else:
+                break
 
 def load_data(city, month, day):
     """
@@ -63,7 +80,18 @@ def load_data(city, month, day):
     df['day'] = df['Start Time'].dt.dayofweek
     df['Hour'] = df['Start Time'].dt.hour 
     
-    return df
+    if month != 'all': 
+        months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
+        month = months.index(month) + 1
+        df = df[df['month']== month]
+
+    if day != 'all':
+        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        day = days.index(day)
+        df = df[df['day'] == day]
+
+    return df 
+    
 
 
 def time_stats(df):
@@ -137,22 +165,25 @@ def user_stats(df):
     # TO DO: Display counts of user types
     user_types = df['User Type'].value_counts()
     print('Total count of users:', user_types)
+    
 
     # TO DO: Display counts of gender
     if 'Gender' in df.columns:
-            gender_count = df['Gender'].value_count()
+            gender_count = df['Gender'].value_counts()
             print('Total count of users based on gender', gender_count)
     else:
             print("Data unavaliable")
 
     # TO DO: Display earliest, most recent, and most common year of birth
-    earliest = df['Birth Year'].min()
-    most_recent = df['Birth Year'].max()
-    most_common = df['Birth Year'].mode()[0]
-    print('The oldest user was born in:', earliest)
-    print('The youngest user was born in:', most_recent)
-    print('The most common birth year is:', most_common)
-
+    if 'Birth Year' in df.columns:
+        earliest = df['Birth Year'].min()
+        most_recent = df['Birth Year'].max()
+        most_common = df['Birth Year'].mode()[0]
+        print('The oldest user was born in:', earliest)
+        print('The youngest user was born in:', most_recent)
+        print('The most common birth year is:', most_common)
+    else:
+        print("Birth year is unavaliable for this dataset")
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
@@ -166,11 +197,11 @@ def main():
         station_stats(df)
         trip_duration_stats(df)
         user_stats(df)
-
+        display_data(df)
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
             break
-
+        
 
 if __name__ == "__main__":
 	main()
